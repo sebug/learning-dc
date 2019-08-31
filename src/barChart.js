@@ -6,10 +6,33 @@ import data from './payment-data.js';
 import dcCSS from 'dc/dc.css';
 import print_filter from './print-filter.js';
 
-function barChart() {
-    const facts = crossfilter(data);
+function setUpDOM() {
+    const h1 = document.createElement('h1');
+    h1.innerHTML = 'Bar Charts: payments by type';
 
-    print_filter(facts);
+    const theDiv = document.createElement('div');
+    theDiv.setAttribute('id', 'chart');
+    
+    document.body.prepend(h1, theDiv);
+    document.title = 'Bar Chart';
+}
+
+function barChart() {
+    setUpDOM();
+    
+    const facts = crossfilter(data);
+    const typeDimension = facts.dimension(d => d.type);
+    const typeGroup = typeDimension.group();
+
+    dc.barChart('#chart')
+	.dimension(typeDimension)
+	.group(typeGroup)
+	.x(d3.scaleOrdinal().domain(
+	    Array.from(typeGroup).map(d => d.key)
+	))
+	.xUnits(dc.units.ordinal);
+
+    dc.renderAll();
 }
 
 export default barChart;
